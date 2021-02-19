@@ -32,7 +32,7 @@ async def obecnosc(ctx, *, topic):
     message = await ctx.send('@here', embed=embed)
     await message.add_reaction('👍')
 
-@client.command()
+@client.command()                                                       #pytanie
 async def pytanie(ctx, *, content):
     if not ctx.author.guild_permissions.administrator:
         return
@@ -45,7 +45,7 @@ async def pytanie(ctx, *, content):
     await message.add_reaction('👍')
     await message.add_reaction('👎')
 
-@client.command()
+@client.command()                                                       #ankieta
 async def ankieta(ctx, *, text):
     if not ctx.author.guild_permissions.administrator:
         return
@@ -69,7 +69,7 @@ async def ankieta(ctx, *, text):
     new_embed = embed.add_field(name='Aby wygodnie przejrzeć odpowiedzi:', value=f'-ankieta_check {message.id}')
     await message.edit(embed=new_embed)
 
-@client.command()
+@client.command()                                                       #ankieta_check
 async def ankieta_check(ctx, id: int):
     if not ctx.author.guild_permissions.administrator:
         return
@@ -91,7 +91,7 @@ async def ankieta_check(ctx, id: int):
     
     await ctx.send(f'**Wyniki ankiety:**\n{formated_text}')
 
-@client.event
+@client.event                                                           #raw reaction add
 async def on_raw_reaction_add(payload):
     channel = client.get_channel(payload.channel_id)
     user = client.get_guild(payload.guild_id).get_member(payload.user_id)
@@ -123,7 +123,7 @@ async def on_raw_reaction_add(payload):
             new_embed = old_embed.add_field(name='Rezultat', value=formated_text)
             await message.edit(embed=new_embed)
 
-@client.event
+@client.event                                                           #raw reaction remove
 async def on_raw_reaction_remove(payload):
     channel = client.get_channel(payload.channel_id)
     user = client.get_guild(payload.guild_id).get_member(payload.user_id)
