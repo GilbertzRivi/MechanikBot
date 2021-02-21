@@ -100,6 +100,7 @@ async def pytanie_otwarte(ctx, *, pytanie):
 
 @client.command()                                                       #odpowiedz
 async def odp(ctx, *, odp):
+    await ctx.message.delete()
     async for message in ctx.channel.history(limit=100):
         if message.author == client.user and message.embeds[0].title == 'Pytanie otwarte':
             break
