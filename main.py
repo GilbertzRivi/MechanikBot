@@ -50,11 +50,9 @@ async def ankieta(ctx, *, text):
     if not ctx.author.guild_permissions.administrator:
         return
 
-    print(text)
     text = text.split(' - ')
     question = text[0]
     responses = text[1].split(', ')
-    print(question, '--a', responses)
     
     emoji_list = ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣']
     embed=discord.Embed(title='Ankieta', color=0x00ff00, timestamp=ctx.message.created_at)
@@ -66,16 +64,16 @@ async def ankieta(ctx, *, text):
     for i in range(len(responses)):
         await message.add_reaction(emoji_list[i])
         time.sleep(0.5)
-    new_embed = embed.add_field(name='Aby wygodnie przejrzeć odpowiedzi:', value=f'-ankieta_check {message.id}')
-    await message.edit(embed=new_embed)
 
 @client.command()                                                       #ankieta_check
-async def ankieta_check(ctx, id: int):
+async def ankieta_check(ctx):
     if not ctx.author.guild_permissions.administrator:
         return
     
     emoji_list = ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣']
-    message = await ctx.channel.fetch_message(id)
+    async for message in ctx.channel.history(limit=100):
+        if message.author == client.user and message.embeds[0].title == 'Ankieta':
+            break
     formated_text = ''
     for reaction in message.reactions:
         if not reaction.emoji in emoji_list:
@@ -91,7 +89,28 @@ async def ankieta_check(ctx, id: int):
     
     await ctx.send(f'**Wyniki ankiety:**\n{formated_text}')
 
-@client.event                                                           #raw reaction add
+@client.command()                                                       #pytanie_otwarte
+async def pytanie_otwarte(ctx, *, pytanie):
+    if not ctx.author.guild_permissions.administrator:
+        return
+
+    embed=discord.Embed(title='Pytanie otwarte', color=0x00ff00, timestamp=ctx.message.created_at)
+    embed.add_field(name=pytanie, value='Odpowiedzi:', inline=False)
+    await ctx.send(embed=embed)
+
+@client.command()                                                       #odpowiedz
+async def odp(ctx, *, odp):
+    async for message in ctx.channel.history(limit=100):
+        if message.author == client.user and message.embeds[0].title == 'Pytanie otwarte':
+            break
+    
+    embed = message.embeds[0]
+    if not ctx.author.nick in [field.name for field in embed.fields]:
+        embed.add_field(name=ctx.author.nick, value=odp, inline=False)
+            
+    await message.edit(embed=embed)
+
+@client.event                                                           #raw_reaction_add
 async def on_raw_reaction_add(payload):
     channel = client.get_channel(payload.channel_id)
     user = client.get_guild(payload.guild_id).get_member(payload.user_id)
@@ -123,7 +142,7 @@ async def on_raw_reaction_add(payload):
             new_embed = old_embed.add_field(name='Rezultat', value=formated_text)
             await message.edit(embed=new_embed)
 
-@client.event                                                           #raw reaction remove
+@client.event                                                           #raw_reaction_remove
 async def on_raw_reaction_remove(payload):
     channel = client.get_channel(payload.channel_id)
     user = client.get_guild(payload.guild_id).get_member(payload.user_id)
